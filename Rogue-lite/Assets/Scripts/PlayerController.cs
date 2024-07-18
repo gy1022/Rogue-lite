@@ -55,7 +55,11 @@ public class PlayerController : MonoBehaviour
         {
             MoveLogic(isGrounded);
             JumpLogic(isGrounded);
-        }
+            AttackLogic(isGrounded);
+            LoootLogic(isGrounded);
+            OpenLogic(isGrounded);
+            DashLogic();
+        } 
         else
         {
             UpdateAction();
@@ -176,6 +180,95 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("IsJumping", false);
         }
+    }
+
+    public void AttackLogic(bool isGrounded)
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1) && isGrounded)
+        {
+            DoAction(comboSystem.PerformAction(animator));
+        }
+    }
+    public void LoootLogic(bool isGrounded)
+    {
+        if (Input.GetKeyDown(KeyCode.E) && isGrounded)
+        {
+            DoAction("Loot");
+        }
+    }
+    public void OpenLogic(bool isGrounded)
+    {
+        if (Input.GetKeyDown(KeyCode.R) && isGrounded)
+        {
+            DoAction("Open");
+        }
+    }
+
+
+    void DoAction(string actionName)
+    {
+        ActionData temp = FindActionByAnimName(actionName);
+        DoAction(temp);
+    }
+
+    void DoAction(ActionData actionData)
+    {
+        if (actionData == null) return;
+        isAction = true;
+        currentAction = actionData;
+        actionTimer = 0.0f;
+        animator.CrossFade(actionData.MecanimName, 0);
+        animator.SetFloat("moveSpeed", 0);
+    }
+
+    public ActionData FindActionByAnimName(string animName)
+    {
+        foreach (ActionData actionData in actionDataList)
+        {
+            if(actionData != null && actionData.animName == animName)
+            {
+                return actionData;
+            }
+        }
+        return null;
+    }
+
+    public void DashLogic()
+    {
+        if(isDashing)
+        {
+            ContinuseDash(moveDir);
+        }
+
+        if(Input.GetKeyDown(KeyCode.LeftShift) && dashCounter <= 0)
+        {
+            StartDash();
+        }
+
+        if(dashCounter > 0)
+        {
+            dashCounter -= Time.deltaTime;
+        }
+
+    }
+    private void StartDash()
+    {
+        isDashing = true;
+        dashTimer = dashTime;
+        dashCounter = dashCooldown;
+        animator.SetInteger("IsDashing", 1);
+    }
+
+    private void ContinuseDash(Vector3 moveDirection)
+    {
+        animator.SetInteger("IsDashing", 2);
+        dashTimer -= Time.deltaTime;
+        if(dashTimer <= 0)
+        {
+            isDashing = false;
+            animator.SetInteger("IsDashing", 0 );
+        }
+        controller.Move(moveDirection * dashSpeed * Time.deltaTime);
     }
 
 }

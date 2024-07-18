@@ -26,7 +26,8 @@ public class SphericalCamera : MonoBehaviour
     {
         if(target != null)
         {
-
+            HandleInput();
+            UpdateCameraPosition();
         }
         
     }
@@ -47,6 +48,15 @@ public class SphericalCamera : MonoBehaviour
         float horizontalAngleRadians = currentHorizontalAngle * Mathf.Deg2Rad;
 
         float x = distance * Mathf.Sin(verticalAngleRadians) * Mathf.Cos(horizontalAngleRadians);
+        float z = distance * Mathf.Sin(verticalAngleRadians) * Mathf.Sin(horizontalAngleRadians);
+        float y = distance * Mathf.Cos(verticalAngleRadians);
+
+        Vector3 newPosition = new Vector3(x, y, z);
+        newPosition = target.position + newPosition;
+
+        transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * 6);
+        transform.LookAt(target);
+
     }
 
 }
